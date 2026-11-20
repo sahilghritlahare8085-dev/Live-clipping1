@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ClipLive – Live Stream Clipper</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f6f4fb;--card:#fff;--tx:#1b1530;--mu:#6b6585;--ac:#e0348f;--ac2:#6b4cf0;--bd:#e5e0f2}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f0b1d;--card:#1a1430;--tx:#f3efff;--mu:#a59fc0;--bd:#2d2550}}
+:root[data-theme="dark"]{--bg:#0f0b1d;--card:#1a1430;--tx:#f3efff;--mu:#a59fc0;--bd:#2d2550}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:760px;margin:0 auto;padding:18px 14px 60px}
+h1{font-size:24px;margin:0 0 4px}h1 span{background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent}
+p.sub{color:var(--mu);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+input,select{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:10px 12px}
+input{flex:1;min-width:0}
+button{font:inherit;border:0;border-radius:10px;padding:10px 14px;cursor:pointer;color:#fff;background:linear-gradient(90deg,var(--ac),var(--ac2));font-weight:600}
+button.ghost{background:transparent;color:var(--tx);border:1px solid var(--bd);font-weight:500}
+.opts{margin-top:10px;color:var(--mu);font-size:13px;align-items:center}
+h2{font-size:16px;margin:0 0 8px}
+svg{width:100%;height:auto;display:block}
+.badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:rgba(224,52,143,.15);color:var(--ac)}
+.live{background:#e11;color:#fff}
+.clip{border-top:1px solid var(--bd);padding:12px 0}.clip:first-of-type{border-top:0}
+.clip .top{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:13px;color:var(--mu)}
+.clip b.cap{display:block;font-size:16px;margin:4px 0}
+.cm{font-size:13px;color:var(--mu)}
+.hype{height:6px;border-radius:9px;background:var(--bd);margin:6px 0 8px;overflow:hidden}.hype i{display:block;height:100%;background:linear-gradient(90deg,var(--ac2),var(--ac))}
+#chat{height:150px;overflow:auto;font-size:13px}#chat div{padding:2px 0}#chat b{color:var(--ac2)}
+.err{color:#d22;font-size:13px;margin-top:8px}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:9;padding:16px}
+#modal.on{display:flex}
+.ph{width:min(260px,70vw);aspect-ratio:9/16;border-radius:22px;background:linear-gradient(160deg,#3b1d6b,#e0348f 60%,#ffb347);position:relative;overflow:hidden;color:#fff;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.ph .t{position:absolute;top:14px;left:10px;right:10px;font-weight:800;font-size:15px;background:#fff;color:#111;border-radius:8px;padding:6px}
+.ph .k{position:absolute;left:8px;right:8px;bottom:22%;font-weight:900;font-size:24px;text-transform:uppercase;text-shadow:0 2px 0 #000,0 0 8px #000}
+.ph .k em{font-style:normal;color:#ffe600}
+.ph .c{position:absolute;bottom:8px;left:0;right:0;font-size:10px;opacity:.85}
+.face{position:absolute;left:50%;top:36%;width:44%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 40%,#ffd9b0,#e8a070);transform:translateX(-50%)}
+.face::after{content:"";position:absolute;inset:-8%;border:2px dashed #ffe600;border-radius:12px}
+.zm .face{animation:zm 2.4s ease-in-out infinite}
+@keyframes zm{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.35) rotate(-4deg)}}
+.k.cs-min{font-size:17px;text-transform:none;font-weight:700;text-shadow:0 1px 4px #000}
+.k.cs-neon{color:#7ffcff;text-shadow:0 0 6px #0ff,0 0 14px #0ff}.k.cs-neon em{color:#ff5df0}
+.sg{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:4px 0 6px;font-size:11px;color:var(--mu)}.sg i{display:block;height:4px;border-radius:9px;background:var(--ac2);margin-top:2px}
+.ep{font-size:12px;color:var(--mu);margin:2px 0}.ep b{color:var(--ac)}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 14px;border-radius:10px;font-size:13px;display:none;z-index:10;max-width:90vw}
+</style>
+</head>
+<body>
+<main>
+<h1>Clip<span>Live</span> ⚡</h1>
+<p class="sub">Paste a YouTube live/video URL. Get 9+ funny, hype and roast clips, auto-detected by AI, with face-zoom edits and English captions.</p>
+
+<div class="card">
+  <div class="row"><input id="url" placeholder="https://youtube.com/live/..." value="https://youtube.com/live/demo-gta-stream"><button id="go" type="button" onclick="try{run()}catch(e){document.getElementById('err').textContent='Error: '+e.message}">Analyze</button></div>
+  <div class="row opts">
+    <label>Clip length <select id="len"><option>20</option><option selected>30</option><option>45</option><option>60</option></select> sec</label>
+    <label>AI mode <select id="sty"><option selected>Auto</option><option>Funny</option><option>Hype</option><option>Roast</option></select></label>
+    <label>Quality <select id="q"><option value="720x1280">720p</option><option value="1080x1920" selected>1080p HD</option><option value="2160x3840">4K</option></select></label>
+    <label>Captions <select id="cs"><option value="bold">Bold karaoke</option><option value="min">Minimal</option><option value="neon">Neon</option></select></label>
+  </div>
+  <div class="row opts"><label><input type="checkbox" id="fz" checked style="flex:none"> Face tracking + zoom</label><label><input type="checkbox" id="bs" checked style="flex:none"> Beat-sync cuts</label><label><input type="checkbox" id="sm" checked style="flex:none"> Slow-mo on peak</label><label><input type="checkbox" id="sf" checked style="flex:none"> Sound FX + emoji</label></div>
+  <div class="err" id="err"></div>
+</div>
+
+<div id="res" style="display:none">
+  <div class="card">
+    <h2>Live chat hype <span class="badge live">LIVE</span></h2>
+    <svg id="chart" viewBox="0 0 600 150" role="img" aria-label="Chat activity chart"></svg>
+    <div class="cm" id="sum"></div>
+  </div>
+  <div class="card"><h2>Live chat feed</h2><div id="chat"></div></div>
+  <div class="card">
+    <div class="row" style="justify-content:space-between;align-items:center"><h2 id="ct" style="margin:0"></h2><button id="exp">Export all 1080×1920</button></div>
+    <div id="clips"></div>
+  </div>
+  <p class="cm">Demo mode: sample data is generated in your browser. Real downloading, cutting and captioning needs a backend (yt-dlp, ffmpeg, Whisper). Clip only streamers who allow it, and always add credit.</p>
+</div>
+</main>
+
+<div id="modal"><div><div class="ph" id="ph"><div class="face"></div><div class="t" id="pt"></div><div class="k" id="pk"></div><div class="c" id="pc"></div></div><div style="text-align:center;margin-top:12px"><button class="ghost" style="color:#fff;border-color:#fff" id="close">Close</button></div></div></div>
+<div id="toast"></div>
+
+<script>
+var $=function(s){return document.querySelector(s)};
+var CAPS={Funny:["He pulled up to the wrong shack","Physics has left the chat","Bro said trust me and walked into a wall","The getaway driver forgot the getaway","Plot twist: nobody asked","NPC energy: maximum","That escalated quickly","Skill issue? Never heard of it","Chat, we are so cooked"],
+Hype:["THIS IS INSANE","Did that just happen?!","Clip it, clip it NOW","Absolute cinema","Everyone is losing it","No way he pulled that off","Greatest moment of the stream","Chat went wild","Peak gameplay unlocked"],
+Roast:["Aim so bad it is a talent","Even the bots are laughing","Brain.exe stopped working","Confidence: 100. Skill: 3","He tried. He really tried","Tutorial speedrun fail","That plan had one flaw: everything","Chat is writing his obituary","Respawn and think about it"]};
+var TAGS=["Funny","Hype","Fail","Clutch","Chaos"];
+var CHAT=["LETS GOOO","LMAOOO","clip that!!","no way 💀","BRO WHAT","W streamer","I cant breathe 😂","POGGERS","replay replay","he is cooked","INSANE","chat is crazy rn"];
+var USERS=["gamer_21","ninja_fan","xXpixelXx","clipgod","aryan07","luna.tv","speedy","noob_master"];
+var timer=null,cur=[];
+function rng(s){return function(){s=(s*1664525+1013904223)>>>0;return s/4294967296}}
+function hash(s){var h=7;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h}
+function fmt(sec){sec=Math.max(0,Math.round(sec));var h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=sec%60;return h+":"+(m<10?"0":"")+m+":"+(s<10?"0":"")+s}
+function toast(t){var e=$("#toast");e.textContent=t;e.style.display="block";setTimeout(function(){e.style.display="none"},2600)}
+function run(){
+  var url=$("#url").value.trim();
+  if(!/youtu(\.be|be\.com)/i.test(url)){$("#err").textContent="Please paste a valid YouTube URL.";return}
+  $("#err").textContent="";$("#go").textContent="Analyzed ✓ (tap to re-run)";
+  var r=rng(hash(url)),N=120,d=[],P=[],i,j;
+  for(i=0;i<9;i++)P.push([10+i*12+Math.floor(r()*5),50+r()*50]);
+  for(i=0;i<N;i++){var v=12+r()*12;for(j=0;j<9;j++)v+=P[j][1]*Math.exp(-Math.pow(i-P[j][0],2)/5);d.push(v)}
+  var pk=[];
+  for(i=1;i<N-1;i++)if(d[i]>45&&d[i]>=d[i-1]&&d[i]>d[i+1])pk.push(i);
+  pk.sort(function(a,b){return d[b]-d[a]});pk=pk.slice(0,Math.max(9,pk.length>12?12:pk.length)).sort(function(a,b){return a-b});
+  var max=Math.max.apply(null,d),len=+$("#len").value,sty=$("#sty").value,path="";
+  d.forEach(function(v,k){path+=(k?"L":"M")+(k*600/(N-1)).toFixed(1)+","+(140-v/max*125).toFixed(1)});
+  var svg='<path d="'+path+'" fill="none" stroke="#6b4cf0" stroke-width="2"/>';
+  pk.forEach(function(p,k){var x=p*600/(N-1),y=140-d[p]/max*125;svg+='<circle cx="'+x+'" cy="'+y+'" r="9" fill="#e0348f"/><text x="'+x+'" y="'+(y+4)+'" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">'+(k+1)+'</text>'});
+  $("#chart").innerHTML=svg;
+  $("#sum").textContent=pk.length+" chat-spike moments found in the last "+N+" min. Peaks become clips.";
+  cur=pk.map(function(p,k){var st=Math.max(0,p*60-Math.round(len*0.6));var a=ai(r,sty,k);return{n:k+1,st:st,en:st+len,hype:Math.round(d[p]/max*100),cap:a.cap,tag:a.tag,sg:a.sg,conf:a.conf,cm:[CHAT[Math.floor(r()*12)],CHAT[Math.floor(r()*12)],CHAT[Math.floor(r()*12)]]}});
+  $("#ct").textContent=cur.length+" clips ready";
+  var h="";
+  cur.forEach(function(c,k){h+='<div class="clip"><div class="top"><span>#'+c.n+" · "+fmt(c.st)+" → "+fmt(c.en)+' <span class="badge">'+c.tag+'</span></span><span>Hype '+c.hype+'%</span></div><div class="hype"><i style="width:'+c.hype+'%"></i></div>'+bars(c)+'<b class="cap"></b><div class="cm">Hype chat: '+c.cm.join(" · ")+'</div><div class="row" style="margin-top:8px"><button data-p="'+k+'">Preview 9:16</button><button class="ghost" data-c="'+k+'">Copy caption</button></div></div>'});
+  $("#clips").innerHTML=h;
+  var caps=document.querySelectorAll(".cap");cur.forEach(function(c,k){caps[k].textContent=c.cap});
+  $("#res").style.display="block";
+  clearInterval(timer);$("#chat").innerHTML="";
+  timer=setInterval(function(){var e=document.createElement("div"),b=document.createElement("b");b.textContent=USERS[Math.floor(Math.random()*8)]+": ";e.appendChild(b);e.appendChild(document.createTextNode(CHAT[Math.floor(Math.random()*12)]));var c=$("#chat");c.appendChild(e);if(c.children.length>40)c.removeChild(c.firstChild);c.scrollTop=c.scrollHeight},900);
+  $("#res").scrollIntoView({behavior:"smooth"});
+}
+function ai(r,sty,k){var g=function(){return 20+Math.floor(r()*80)};var sg={laugh:g(),hype:g(),roast:g(),face:g(),motion:g()};var cat=sty!="Auto"?sty:(sg.laugh>=sg.hype&&sg.laugh>=sg.roast?"Funny":(sg.hype>=sg.roast?"Hype":"Roast"));var m=Math.max(sg.laugh,sg.hype,sg.roast);return{cap:CAPS[cat][(k+Math.floor(r()*3))%9],tag:cat,sg:sg,conf:Math.min(99,m)}}
+function bars(c){var s=c.sg,n=[["Laugh",s.laugh],["Hype",s.hype],["Roast",s.roast],["Face",s.face],["Motion",s.motion]],h='<div class="sg">';n.forEach(function(x){h+='<div>'+x[0]+' '+x[1]+'<i style="width:'+x[1]+'%"></i></div>'});h+='</div><div class="ep">AI detected <b>'+c.tag+'</b> ('+c.conf+'% sure)</div>';var e=[];if($("#fz").checked)e.push("face zoom 1.0→1.4×");if($("#bs").checked)e.push("beat-sync cuts");if($("#sm").checked)e.push("0.5× slow-mo at "+fmt(c.st+Math.round((c.en-c.st)*0.6)));if($("#sf").checked)e.push(c.tag=="Roast"?"SFX: sad trombone 🎺":c.tag=="Hype"?"SFX: airhorn 📢":"SFX: laugh track 😂");return h+'<div class="ep">Edit plan: '+(e.join(" · ")||"none")+'</div>'}
+var wt=null;
+function preview(c){
+  $("#pt").textContent=c.cap;$("#pc").textContent="Credit: streamer (live on YouTube) · "+$("#q").selectedOptions[0].text;$("#ph").className="ph"+($("#fz").checked?" zm":"");$("#pk").className="k cs-"+$("#cs").value;
+  var w=c.cap.toUpperCase().split(" "),i=0;$("#modal").className="on";clearInterval(wt);
+  function s(){var o="";w.forEach(function(x,k){if(k>=i&&k<i+3)o+=(k==i?"<em>"+x+"</em> ":x+" ")});$("#pk").innerHTML=o;i=(i+1)%w.length}
+  s();wt=setInterval(s,450);
+}
+document.addEventListener("click",function(e){
+  var t=e.target;
+  if(t.id=="close"||t.id=="modal"){$("#modal").className="";clearInterval(wt)}
+  else if(t.id=="exp")toast("Demo: connect the backend to render "+cur.length+" MP4 files at "+$("#q").value.replace("x","×")+".");
+  else if(t.dataset&&t.dataset.p!=null)preview(cur[+t.dataset.p]);
+  else if(t.dataset&&t.dataset.c!=null){var x=cur[+t.dataset.c].cap;if(navigator.clipboard)navigator.clipboard.writeText(x).then(function(){toast("Caption copied")},function(){toast(x)});else toast(x)}
+});
+$("#url").addEventListener("keydown",function(e){if(e.key=="Enter")run()});
+</script>
+</body>
+</html>
